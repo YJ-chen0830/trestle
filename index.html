@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>施工便橋／構台計算 | Temporary Bridge & Trestle</title>
+<script src="https://yj-chen0830.github.io/jrh-core/jrh-core.js?v=1" defer></script>
+<style>
+  :root{--navy:#0b1f3a;--navy2:#13284a;--gold:#c9a14a;--gold2:#e0bf6e;--bg:#f5f3ee;--ink:#1c2530;--line:#d8d2c2;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Noto Sans TC","Segoe UI",sans-serif;background:var(--bg);color:var(--ink);}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#f5f3ee;padding:28px 32px;}
+  header h1{margin:0;font-size:22px;}
+  header span{color:var(--gold2);font-size:13px;display:block;margin-top:4px;}
+  main{max-width:1060px;margin:0 auto;padding:28px 20px 60px;}
+  .tabs{display:flex;gap:8px;margin-bottom:20px;}
+  .tab{padding:9px 20px;border:2px solid var(--navy);border-radius:7px;cursor:pointer;font-weight:600;font-size:14px;background:#fff;color:var(--navy);}
+  .tab.active{background:var(--navy);color:#fff;}
+  .panel{display:none;}.panel.active{display:block;}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:24px;}
+  @media(max-width:820px){.grid{grid-template-columns:1fr;}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 24px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+  .card h2{font-size:14.5px;margin:0 0 18px;color:var(--navy);font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--gold);padding-bottom:10px;}
+  label{display:block;font-size:12px;color:#666;margin:10px 0 4px;font-weight:500;}
+  input,select{width:100%;padding:8px 11px;border:1.5px solid var(--line);border-radius:7px;font-size:13.5px;background:#fafaf8;}
+  input:focus,select:focus{outline:none;border-color:var(--gold);}
+  .sec{font-size:12px;font-weight:700;color:var(--navy);margin:16px 0 6px;border-left:4px solid var(--gold);padding-left:9px;letter-spacing:.04em;text-transform:uppercase;}
+  .note{font-size:11.5px;color:#999;margin-top:12px;line-height:1.75;background:#f9f7f2;border-radius:6px;padding:9px 12px;}
+  button.calc-btn{margin-top:16px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;}
+  button.calc-btn:hover{background:var(--navy2);}
+  button.pro-btn{margin-top:12px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--gold);color:var(--navy);font-size:14.5px;font-weight:700;cursor:pointer;}
+  button.pro-btn:hover{filter:brightness(1.08);}
+  table{width:100%;border-collapse:collapse;margin-top:10px;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  th{background:var(--navy);color:#f5f3ee;font-weight:600;font-size:12px;padding:9px 10px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  td{padding:9px 10px;font-size:13px;border-bottom:1px solid var(--line);}
+  tr:nth-child(even) td{background:#f9f7f3;}
+  td:last-child{text-align:right;font-weight:700;}
+  .ok{color:#1a7d3a;font-weight:700;}.ng{color:#c0392b;font-weight:700;}
+  details.proc{margin-top:16px;border:1px solid var(--line);border-radius:8px;background:#fafaf8;overflow:hidden;}
+  details.proc summary{cursor:pointer;padding:10px 14px;font-weight:700;font-size:13px;color:var(--navy);user-select:none;list-style:none;display:flex;align-items:center;gap:6px;}
+  details.proc summary::before{content:"▶";font-size:10px;transition:transform .2s;}
+  details[open].proc summary::before{transform:rotate(90deg);}
+  details.proc pre{margin:0;padding:12px 16px 16px;font-family:"Courier New",monospace;font-size:11.5px;line-height:1.9;white-space:pre-wrap;color:#2c3e50;border-top:1px solid var(--line);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .proj-section{background:#fff;border:1px solid var(--gold);border-radius:10px;padding:18px 22px;margin-bottom:20px;}
+  .proj-section h3{margin:0 0 12px;color:var(--navy);font-size:14px;font-weight:700;}
+  .proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:600px){.proj-grid{grid-template-columns:1fr;}}
+  .mob-tabs{display:none;}
+  @media screen and (max-width:767px){
+    .mob-tabs{display:flex;background:var(--bg);border-bottom:2px solid var(--line);margin:0 -20px 0;padding:0 20px;}
+    .mob-tab{flex:1;padding:11px 4px;text-align:center;font-size:13.5px;font-weight:700;color:#888;cursor:pointer;background:transparent;border:none;border-bottom:3px solid transparent;}
+    .mob-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+    .grid{display:block;}
+    .grid>.card{display:none;}
+    .grid>.card.mob-active{display:block;}
+  }
+  @media print{
+    header,.tabs,.no-print{display:none!important;}
+    body{background:#fff;margin:0;font-size:9pt;line-height:1.5;color:#111;}
+    main{padding:0;max-width:100%!important;}
+    .pane,.panel{display:block!important;}
+    .grid{grid-template-columns:1fr!important;gap:10pt!important;}
+    .card{box-shadow:none!important;border:1px solid #ccc!important;border-radius:4pt!important;padding:10pt 12pt!important;break-inside:avoid;}
+    .card h2{font-size:10.5pt!important;padding-bottom:6pt!important;margin-bottom:9pt!important;}
+    label{font-size:8pt!important;margin:6pt 0 2pt!important;}
+    .sec{font-size:8pt!important;margin:10pt 0 4pt!important;}
+    .note{font-size:7.5pt!important;padding:6pt 9pt!important;}
+    table{border:1px solid #bbb!important;border-radius:0!important;margin-top:6pt!important;}
+    th{font-size:8pt!important;padding:5pt 7pt!important;background:#0b1f3a!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    td{font-size:8.5pt!important;padding:5pt 7pt!important;}
+    tr:nth-child(even) td{background:#f5f5f5!important;}
+    details.proc{display:block!important;margin-top:10pt!important;border:1pt solid #0b1f3a!important;border-radius:4pt!important;break-inside:avoid;background:#f9f9f6!important;}
+    details.proc>summary{display:none!important;}
+    details.proc::before{content:"📋  計算過程（供第三方檢核）";display:block;font-weight:700;font-size:8pt;color:#0b1f3a;padding:6pt 10pt 4pt;border-bottom:1px solid #ccc;letter-spacing:.04em;}
+    details.proc>pre{font-size:7pt!important;line-height:1.65!important;white-space:pre-wrap!important;padding:6pt 10pt 10pt!important;color:#1a1a1a!important;font-family:"Courier New",monospace!important;}
+    .proj-section{border:1.5pt solid #0b1f3a!important;border-radius:4pt!important;}
+    button.pro-btn,button.calc-btn{display:none!important;}
+    @page{margin:15mm 12mm;size:A4;}
+  }
+</style>
+</head>
+<body data-tool="tb">
+<header>
+  <h1>🌉 施工便橋／施工構台計算</h1>
+  <span>Temporary Bridge & Trestle · H 型鋼主梁＋覆工板＋支承樁</span>
+</header>
+<main>
+
+<div class="proj-section no-print" id="projSection">
+  <h3>📁 專案資訊（列印時帶入計算書封面）</h3>
+  <div class="proj-grid">
+    <div><label>工程名稱</label><input id="pj-name" placeholder="○○排水改善工程"></div>
+    <div><label>工程地點</label><input id="pj-loc" placeholder="台中市○○區"></div>
+    <div><label>承造廠商</label><input id="pj-contractor" placeholder="○○營造股份有限公司"></div>
+    <div><label>文件編號</label><input id="pj-docno" placeholder="TB-CAL-001"></div>
+    <div><label>計算者</label><input id="pj-calc" placeholder="姓名"></div>
+    <div><label>審核者</label><input id="pj-review" placeholder="姓名"></div>
+    <div><label>計算日期</label><input id="pj-date" type="date"></div>
+  </div>
+</div>
+
+<div class="tabs no-print">
+  <div class="tab active" id="tab-br" onclick="switchTab('br')">施工便橋</div>
+  <div class="tab" id="tab-tr" onclick="switchTab('tr')">施工構台</div>
+</div>
+
+<!-- ===== 便橋 ===== -->
+<div id="panel-br" class="panel active">
+<div class="mob-tabs">
+  <button class="mob-tab active" onclick="switchMobTab('br-in',this)">📋 輸入參數</button>
+  <button class="mob-tab" id="mobTab-br-r" onclick="switchMobTab('br-r',this)">📊 計算結果</button>
+</div>
+<div class="grid">
+  <div class="card mob-active" data-tab="br-in">
+    <h2>便橋輸入（簡支）</h2>
+    <div class="sec">幾何</div>
+    <div class="row2">
+      <div><label>跨徑 L (m)</label><input id="br-L" type="number" value="8.0" step="0.5" min="2"></div>
+      <div><label>橋面寬 B (m)</label><input id="br-B" type="number" value="4.0" step="0.5" min="2"></div>
+    </div>
+    <div class="sec">主梁（H 型鋼）</div>
+    <label>斷面</label>
+    <select id="br-sec">
+      <option value="1360,20400,300">H300×300（Zx=1360cm³, Ix=20400cm⁴）</option>
+      <option value="2300,40300,350">H350×350（Zx=2300cm³, Ix=40300cm⁴）</option>
+      <option value="3330,66600,400" selected>H400×400（Zx=3330cm³, Ix=66600cm⁴）</option>
+      <option value="2000,47800,500">H500×200（Zx=2000cm³, Ix=47800cm⁴）</option>
+      <option value="2520,70200,600">H600×200（Zx=2520cm³, Ix=70200cm⁴）</option>
+    </select>
+    <div class="row2">
+      <div><label>主梁支數 n</label><input id="br-n" type="number" value="4" min="2" step="1"></div>
+      <div><label>容許彎曲應力 σa (MPa)</label><input id="br-sa" type="number" value="210" step="5"></div>
+    </div>
+    <div class="sec">載重</div>
+    <label>設計車輛</label>
+    <select id="br-veh" onchange="brVehChange()">
+      <option value="100,35">35t 級吊車（後軸重 10t）</option>
+      <option value="130,43" selected>混凝土攪拌車＋泵送（後軸重 13t）</option>
+      <option value="160,50">50t 級吊車（後軸重 16t）</option>
+      <option value="custom">自訂軸重</option>
+    </select>
+    <div id="br-p-wrap" style="display:none"><label>最大軸重 P (kN)</label><input id="br-P" type="number" value="130"></div>
+    <div class="row2">
+      <div><label>衝擊係數 i</label><input id="br-i" type="number" value="0.3" step="0.05" min="0"></div>
+      <div><label>橋面均佈 q (kN/m²)（覆工板+雜項）</label><input id="br-q" type="number" value="3.0" step="0.5"></div>
+    </div>
+    <label>軸重橫向分配至單梁比例 α（保守可取 0.5）</label>
+    <input id="br-al" type="number" value="0.5" step="0.05" min="0.2" max="1">
+    <div class="sec">支承（H 樁）</div>
+    <div class="row2">
+      <div><label>每橋台樁數</label><input id="br-np" type="number" value="4" min="1" step="1"></div>
+      <div><label>單樁容許承載力 Ra (kN)</label><input id="br-ra" type="number" value="300" step="10"></div>
+    </div>
+    <button class="calc-btn" onclick="calcBridge()">計算便橋</button>
+    <div class="note">主梁以「單軸重×分配比 α 置於跨中＋均佈載重」之最不利簡支模型檢核。覆工板採規格品（如 1×2m 覆工板容許輪重 8t）者免另行檢核，非規格品應另檢討。撓度限制 L/400。</div>
+  </div>
+  <div class="card" data-tab="br-r">
+    <h2>便橋結果</h2>
+    <div id="br-result"><p style="color:#888">尚未計算</p></div>
+    <details class="proc" id="br-proc" style="display:none">
+      <summary>📋 計算過程（供第三方檢核）</summary>
+      <pre id="br-proc-text"></pre>
+    </details>
+    <button class="pro-btn no-print" onclick="openPro()">📄 產出計算書 PDF</button>
+  </div>
+</div>
+</div>
+
+<!-- ===== 構台 ===== -->
+<div id="panel-tr" class="panel">
+<div class="mob-tabs">
+  <button class="mob-tab active" onclick="switchMobTab('tr-in',this)">📋 輸入參數</button>
+  <button class="mob-tab" id="mobTab-tr-r" onclick="switchMobTab('tr-r',this)">📊 計算結果</button>
+</div>
+<div class="grid">
+  <div class="card mob-active" data-tab="tr-in">
+    <h2>構台輸入</h2>
+    <div class="sec">配置</div>
+    <div class="row2">
+      <div><label>小梁間距 s₁ (m)</label><input id="tr-s1" type="number" value="0.6" step="0.1" min="0.3"></div>
+      <div><label>大梁間距（小梁跨）s₂ (m)</label><input id="tr-s2" type="number" value="3.0" step="0.5" min="1"></div>
+    </div>
+    <div class="row2">
+      <div><label>構台柱間距（大梁跨）s₃ (m)</label><input id="tr-s3" type="number" value="6.0" step="0.5" min="2"></div>
+      <div><label>柱高（挫屈長）Lc (m)</label><input id="tr-lc" type="number" value="6.0" step="0.5" min="2"></div>
+    </div>
+    <div class="sec">載重</div>
+    <div class="row2">
+      <div><label>最大軸重 P (kN)</label><input id="tr-P" type="number" value="160" step="10"></div>
+      <div><label>衝擊係數 i</label><input id="tr-i" type="number" value="0.3" step="0.05"></div>
+    </div>
+    <label>構台面均佈 q (kN/m²)（覆工板＋材料堆置）</label>
+    <input id="tr-q" type="number" value="10" step="1">
+    <div class="sec">小梁（H 型鋼）</div>
+    <select id="tr-b1">
+      <option value="472,4720">H200×200（Zx=472, Ix=4720）</option>
+      <option value="867,10800" selected>H250×250（Zx=867, Ix=10800）</option>
+      <option value="1360,20400">H300×300（Zx=1360, Ix=20400）</option>
+    </select>
+    <div class="sec">大梁（H 型鋼）</div>
+    <select id="tr-b2">
+      <option value="1360,20400">H300×300（Zx=1360, Ix=20400）</option>
+      <option value="2300,40300" selected>H350×350（Zx=2300, Ix=40300）</option>
+      <option value="3330,66600">H400×400（Zx=3330, Ix=66600）</option>
+    </select>
+    <div class="sec">構台柱（H 型鋼）</div>
+    <select id="tr-cl">
+      <option value="119.8,7.51">H300×300（A=119.8cm², r=7.51cm）</option>
+      <option value="173.9,8.84" selected>H350×350（A=173.9cm², r=8.84cm）</option>
+      <option value="218.7,10.1">H400×400（A=218.7cm², r=10.1cm）</option>
+    </select>
+    <div class="row2">
+      <div><label>σa (MPa)</label><input id="tr-sa" type="number" value="210" step="5"></div>
+      <div><label>Fy (MPa)</label><input id="tr-fy" type="number" value="235" step="5"></div>
+    </div>
+    <button class="calc-btn" onclick="calcTrestle()">計算構台</button>
+    <div class="note">小梁＝簡支跨 s₂（軸重×½ 置跨中＋分擔均佈）；大梁＝簡支跨 s₃（承小梁反力，換算均佈＋集中最不利）；柱＝軸壓＋AISC ASD 挫屈。撓度限制 L/400。構台整體水平穩定（煞車力、地震）應另行檢討。</div>
+  </div>
+  <div class="card" data-tab="tr-r">
+    <h2>構台結果</h2>
+    <div id="tr-result"><p style="color:#888">尚未計算</p></div>
+    <details class="proc" id="tr-proc" style="display:none">
+      <summary>📋 計算過程（供第三方檢核）</summary>
+      <pre id="tr-proc-text"></pre>
+    </details>
+    <button class="pro-btn no-print" onclick="openPro()">📄 產出計算書 PDF</button>
+  </div>
+</div>
+</div>
+
+</main>
+<script>
+function switchTab(id){
+  ['br','tr'].forEach(function(t){
+    document.getElementById('tab-'+t).classList.toggle('active',t===id);
+    document.getElementById('panel-'+t).classList.toggle('active',t===id);
+  });
+}
+function switchMobTab(name,btn){
+  btn.parentElement.querySelectorAll('.mob-tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  btn.parentElement.nextElementSibling.querySelectorAll('.card').forEach(function(c){
+    c.classList.toggle('mob-active',c.dataset.tab===name);
+  });
+}
+function brVehChange(){document.getElementById('br-p-wrap').style.display=document.getElementById('br-veh').value==='custom'?'':'none';}
+function openPro(){ JRH.checkEmail(function(){ jrhPrint('施工便橋構台計算書'); }); }
+function v(id){return parseFloat(document.getElementById(id).value)||0;}
+function f1(x){return x.toFixed(1);}
+function f2(x){return x.toFixed(2);}
+function statusCell(r){return r<=1.0?'<span class="ok">OK（'+f2(r)+'）</span>':'<span class="ng">NG（'+f2(r)+'）</span>';}
+var E=200000; // MPa
+
+/* ── 便橋 ── */
+function calcBridge(){
+  var L=v('br-L'),B=v('br-B');
+  var sec=document.getElementById('br-sec').value.split(',');
+  var Zx=parseFloat(sec[0]),Ix=parseFloat(sec[1]);
+  var n=Math.max(2,Math.round(v('br-n'))),sa=v('br-sa');
+  var veh=document.getElementById('br-veh').value;
+  var P=veh==='custom'?v('br-P'):parseFloat(veh.split(',')[0]);
+  var i=v('br-i'),q=v('br-q'),al=v('br-al');
+  var np=Math.max(1,Math.round(v('br-np'))),Ra=v('br-ra');
+
+  var Pd=P*(1+i)*al;              // kN 單梁設計集中載重
+  var qb=q*B/n;                    // kN/m 單梁均佈
+  var M=Pd*L/4+qb*L*L/8;           // kN·m
+  var sig=M*1e6/(Zx*1e3);
+  var ratioS=sig/sa;
+  var dP=Pd*1e3*Math.pow(L*1e3,3)/(48*E*Ix*1e4);
+  var dq=5*qb*Math.pow(L*1e3,4)/(384*E*Ix*1e4)/1e3;
+  var d=dP+dq;                     // mm
+  var dAll=L*1e3/400;
+  var ratioD=d/dAll;
+  /* 支承樁：全橋最不利 ≈ 車重全上橋+均佈半跨 */
+  var Rtot=P*(1+i)+q*B*L/2;        // kN 單橋台
+  var Rp=Rtot/np;
+  var ratioP=Rp/Ra;
+
+  var rows=
+    '<tr><td>單梁設計集中載重 Pd＝P(1+i)α</td><td>'+f1(Pd)+' kN</td></tr>'+
+    '<tr><td>單梁均佈 q·B/n</td><td>'+f2(qb)+' kN/m</td></tr>'+
+    '<tr><td>最大彎矩 M＝PdL/4＋qL²/8</td><td>'+f1(M)+' kN·m</td></tr>'+
+    '<tr><td>彎曲應力 σ＝M/Zx</td><td>'+f1(sig)+' MPa</td></tr>'+
+    '<tr><td>應力檢核 σ/σa</td><td>'+statusCell(ratioS)+'</td></tr>'+
+    '<tr><td>撓度 δ（δa＝L/400＝'+f1(dAll)+'mm）</td><td>'+f1(d)+' mm</td></tr>'+
+    '<tr><td>撓度檢核 δ/δa</td><td>'+statusCell(ratioD)+'</td></tr>'+
+    '<tr><td>單樁反力 R（'+np+' 樁/橋台）</td><td>'+f1(Rp)+' kN</td></tr>'+
+    '<tr><td>支承檢核 R/Ra</td><td>'+statusCell(ratioP)+'</td></tr>';
+  document.getElementById('br-result').innerHTML='<table><tr><th>項目</th><th>數值</th></tr>'+rows+'</table>';
+
+  var p='';
+  p+='【施工便橋計算 · 簡支 H 型鋼主梁】\n\n';
+  p+='一、設計條件\n';
+  p+='  跨徑 L = '+f1(L)+' m，橋面寬 B = '+f1(B)+' m，主梁 '+n+' 支\n';
+  p+='  主梁 Zx = '+Zx+' cm³，Ix = '+Ix+' cm⁴，σa = '+sa+' MPa\n';
+  p+='  最大軸重 P = '+f1(P)+' kN，衝擊 i = '+v('br-i')+'，橫向分配 α = '+al+'\n';
+  p+='  均佈 q = '+f1(q)+' kN/m²\n\n';
+  p+='二、主梁彎矩與應力（軸重置跨中最不利）\n';
+  p+='  Pd = P×(1+i)×α = '+f1(P)+'×'+f2(1+i)+'×'+al+' = '+f1(Pd)+' kN\n';
+  p+='  qb = q×B/n = '+f2(qb)+' kN/m\n';
+  p+='  M = PdL/4 + qbL²/8 = '+f1(Pd*L/4)+' + '+f1(qb*L*L/8)+' = '+f1(M)+' kN·m\n';
+  p+='  σ = M/Zx = '+f1(sig)+' MPa，σ/σa = '+f2(ratioS)+(ratioS<=1?' ∴ OK':' ∴ NG，請加大斷面或增加梁數')+'\n\n';
+  p+='三、撓度檢核\n';
+  p+='  δ = PdL³/48EI + 5qbL⁴/384EI = '+f1(dP)+' + '+f1(dq)+' = '+f1(d)+' mm\n';
+  p+='  δa = L/400 = '+f1(dAll)+' mm → δ/δa = '+f2(ratioD)+(ratioD<=1?' ∴ OK':' ∴ NG')+'\n\n';
+  p+='四、支承樁檢核\n';
+  p+='  橋台反力 R = P(1+i) + qBL/2 = '+f1(Rtot)+' kN，每樁 = '+f1(Rp)+' kN\n';
+  p+='  R/Ra = '+f2(ratioP)+(ratioP<=1?' ∴ OK':' ∴ NG，請增加樁數或加大樁徑')+'\n';
+  document.getElementById('br-proc-text').textContent=p;
+  document.getElementById('br-proc').style.display='';
+  if(window.innerWidth<768){var b=document.getElementById('mobTab-br-r');if(b)switchMobTab('br-r',b);}
+}
+
+/* ── 構台 ── */
+function calcTrestle(){
+  var s1=v('tr-s1'),s2=v('tr-s2'),s3=v('tr-s3'),Lc=v('tr-lc');
+  var P=v('tr-P'),i=v('tr-i'),q=v('tr-q');
+  var b1=document.getElementById('tr-b1').value.split(',');
+  var Z1=parseFloat(b1[0]),I1=parseFloat(b1[1]);
+  var b2=document.getElementById('tr-b2').value.split(',');
+  var Z2=parseFloat(b2[0]),I2=parseFloat(b2[1]);
+  var cl=document.getElementById('tr-cl').value.split(',');
+  var Ac=parseFloat(cl[0]),rc=parseFloat(cl[1]);
+  var sa=v('tr-sa'),Fy=v('tr-fy');
+
+  var Pi=P*(1+i);
+  /* 小梁：簡支 s2，輪重½Pi 置跨中 + 均佈 q·s1 */
+  var P1=Pi*0.5;
+  var q1=q*s1;
+  var M1=P1*s2/4+q1*s2*s2/8;
+  var sig1=M1*1e6/(Z1*1e3);
+  var r1=sig1/sa;
+  var d1=P1*1e3*Math.pow(s2*1e3,3)/(48*E*I1*1e4)+5*q1*Math.pow(s2*1e3,4)/(384*E*I1*1e4)/1e3;
+  var d1a=s2*1e3/400,rd1=d1/d1a;
+  /* 大梁：簡支 s3，承受面載重換算均佈 + 輪重直接作用最不利 */
+  var q2=q*s2+ /*小梁自重略*/0;
+  var M2=Pi*s3/4+q2*s3*s3/8;
+  var sig2=M2*1e6/(Z2*1e3);
+  var r2=sig2/sa;
+  var d2=Pi*1e3*Math.pow(s3*1e3,3)/(48*E*I2*1e4)+5*q2*Math.pow(s3*1e3,4)/(384*E*I2*1e4)/1e3;
+  var d2a=s3*1e3/400,rd2=d2/d2a;
+  /* 柱：受載面積 s2×s3 均佈 + 全輪重 */
+  var N=q*s2*s3+Pi;
+  var lam=Lc*100/rc;
+  var Cc=Math.sqrt(2*Math.PI*Math.PI*E/Fy);
+  var Fa;
+  if(lam<=Cc){var t2=lam/Cc;Fa=(1-t2*t2/2)*Fy/(5/3+3*t2/8-t2*t2*t2/8);}
+  else{Fa=12*Math.PI*Math.PI*E/(23*lam*lam);}
+  var sigC=N*1e3/(Ac*1e2);
+  var rC=sigC/Fa;
+
+  var rows=
+    '<tr><td>小梁彎矩 M₁（跨 s₂）</td><td>'+f1(M1)+' kN·m</td></tr>'+
+    '<tr><td>小梁應力檢核 σ/σa</td><td>'+statusCell(r1)+'</td></tr>'+
+    '<tr><td>小梁撓度檢核 δ/(L/400)</td><td>'+statusCell(rd1)+'</td></tr>'+
+    '<tr><td>大梁彎矩 M₂（跨 s₃）</td><td>'+f1(M2)+' kN·m</td></tr>'+
+    '<tr><td>大梁應力檢核 σ/σa</td><td>'+statusCell(r2)+'</td></tr>'+
+    '<tr><td>大梁撓度檢核 δ/(L/400)</td><td>'+statusCell(rd2)+'</td></tr>'+
+    '<tr><td>柱軸力 N</td><td>'+f1(N)+' kN</td></tr>'+
+    '<tr><td>λ / Fa</td><td>'+f1(lam)+' / '+f1(Fa)+' MPa</td></tr>'+
+    '<tr><td>柱檢核 σ/Fa</td><td>'+statusCell(rC)+'</td></tr>';
+  document.getElementById('tr-result').innerHTML='<table><tr><th>項目</th><th>數值</th></tr>'+rows+'</table>';
+
+  var p='';
+  p+='【施工構台計算 · 覆工板－小梁－大梁－構台柱】\n\n';
+  p+='一、設計條件\n';
+  p+='  s₁='+f1(s1)+' m，s₂='+f1(s2)+' m，s₃='+f1(s3)+' m，柱高 Lc='+f1(Lc)+' m\n';
+  p+='  P='+f1(P)+' kN（i='+i+' → Pi='+f1(Pi)+' kN），q='+f1(q)+' kN/m²\n';
+  p+='  小梁 Zx='+Z1+'，大梁 Zx='+Z2+'，柱 A='+Ac+' cm²，r='+rc+' cm\n\n';
+  p+='二、小梁（簡支跨 s₂，輪重½Pi 跨中＋q·s₁）\n';
+  p+='  M₁ = '+f1(P1)+'×'+f1(s2)+'/4 + '+f2(q1)+'×'+f1(s2)+'²/8 = '+f1(M1)+' kN·m\n';
+  p+='  σ = '+f1(sig1)+' MPa（'+f2(r1)+(r1<=1?' OK':' NG')+'）；δ = '+f1(d1)+' mm（限 '+f1(d1a)+'，'+f2(rd1)+(rd1<=1?' OK':' NG')+'）\n\n';
+  p+='三、大梁（簡支跨 s₃，Pi 跨中＋q·s₂）\n';
+  p+='  M₂ = '+f1(Pi*s3/4)+' + '+f1(q2*s3*s3/8)+' = '+f1(M2)+' kN·m\n';
+  p+='  σ = '+f1(sig2)+' MPa（'+f2(r2)+(r2<=1?' OK':' NG')+'）；δ = '+f1(d2)+' mm（限 '+f1(d2a)+'，'+f2(rd2)+(rd2<=1?' OK':' NG')+'）\n\n';
+  p+='四、構台柱（受載面積 s₂×s₃＋全輪重，AISC ASD）\n';
+  p+='  N = q·s₂·s₃ + Pi = '+f1(q*s2*s3)+' + '+f1(Pi)+' = '+f1(N)+' kN\n';
+  p+='  λ = '+f1(lam)+'，Fa = '+f1(Fa)+' MPa，σ = '+f1(sigC)+' MPa\n';
+  p+='  σ/Fa = '+f2(rC)+(rC<=1?' ∴ OK':' ∴ NG，請加大柱斷面或縮短柱距')+'\n';
+  document.getElementById('tr-proc-text').textContent=p;
+  document.getElementById('tr-proc').style.display='';
+  if(window.innerWidth<768){var b=document.getElementById('mobTab-tr-r');if(b)switchMobTab('tr-r',b);}
+}
+</script>
+<script>
+window.jrhDocMeta={
+ "doc": "施工便橋構台計算書",
+ "codes": [
+  "內政部「建築技術規則」建築構造編",
+  "「鋼構造建築物鋼結構設計技術規範」（容許應力設計法）",
+  "公路橋梁設計規範（活載重與衝擊係數參考）",
+  "勞動部「營造安全衛生設施標準」"
+ ],
+ "notes": [
+  "設計車輛軸重應依實際進場之最重車輛（吊車、混凝土車、拖板車）確認，並於便橋／構台入口標示限重。",
+  "覆工板採規格品（廠製覆工板）者依製造商容許輪重使用；非規格品應另行檢核。",
+  "主梁應設置橫向繫條防止側向挫屈；支承處應有防止移動之定位銲或螺栓。",
+  "構台整體之水平力（車輛煞車、地震）穩定與斜撐配置應另行檢討。",
+  "支承樁之容許承載力應依地質條件計算或以試樁確認。",
+  "洪水期間便橋應有預警撤離機制，橋面應設護欄及夜間警示。",
+  "本計算書應經專業技師簽證後，始得作為正式送審文件。"
+ ]
+};
+</script>
+</body>
+</html>
